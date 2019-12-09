@@ -2,7 +2,25 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="row">
+    <div class="col-md-6 col-lg-3">
+        <h3>Products</h3>
+        <p>You can create or update product details here.</p>
+        <p><a asp-area="" asp-controller="Products" asp-action="Index">Manage products &raquo;</a></p>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <h3>Categories</h3>
+        <p>You can create or update product category details here.</p>
+        <p><a asp-area="" asp-controller="Categories" asp-action="Index">Manage categories &raquo;</a></p>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <h3>Makers</h3>
+        <p>You can create or update product maker details here.</p>
+        <p><a asp-area="" asp-controller="Makers" asp-action="Index">Manage makers &raquo;</a></p>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <h3>Suppliers</h3>
+        <p>You can create or update product supplier details here.</p>
+        <p><a asp-area="" asp-controller="Suppliers" asp-action="Index">Manage suppliers &raquo;</a></p>
+    </div>
 </div>

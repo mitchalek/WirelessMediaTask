@@ -12,8 +12,17 @@ namespace WirelessMediaTask.Models
         public string Name { get; set; }
         public string Description { get; set; }
         public decimal Price { get; set; }
+        [Display(Name = "Category")]
+        [Required]
+        public int CategoryId { get; set; }
         public Category Category { get; set; }
+        [Display(Name = "Maker")]
+        [Required]
+        public int MakerId { get; set; }
         public Maker Maker { get; set; }
+        [Display(Name = "Supplier")]
+        [Required]
+        public int SupplierId { get; set; }
         public Supplier Supplier { get; set; }
     }
     public class Category

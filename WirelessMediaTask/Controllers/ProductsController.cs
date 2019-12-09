@@ -21,7 +21,8 @@ namespace WirelessMediaTask.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var productsContext = _context.Products.Include(p => p.Category).Include(p => p.Maker).Include(p => p.Supplier);
+            return View(await productsContext.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -33,6 +34,9 @@ namespace WirelessMediaTask.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Maker)
+                .Include(p => p.Supplier)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
             {
@@ -45,6 +49,9 @@ namespace WirelessMediaTask.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name");
+            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name");
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
             return View();
         }
 
@@ -53,7 +60,7 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
         {
             if (ModelState.IsValid)
             {
@@ -61,6 +68,9 @@ namespace WirelessMediaTask.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -77,6 +87,9 @@ namespace WirelessMediaTask.Controllers
             {
                 return NotFound();
             }
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -85,7 +98,7 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
         {
             if (id != product.ProductId)
             {
@@ -112,6 +125,9 @@ namespace WirelessMediaTask.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -124,6 +140,9 @@ namespace WirelessMediaTask.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.Maker)
+                .Include(p => p.Supplier)
                 .FirstOrDefaultAsync(m => m.ProductId == id);
             if (product == null)
             {
