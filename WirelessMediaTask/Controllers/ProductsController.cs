@@ -6,38 +6,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WirelessMediaTask.Models;
+using WirelessMediaTask.Services;
 
 namespace WirelessMediaTask.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly ProductsContext _context;
+        private readonly IProductsService _service;
 
-        public ProductsController(ProductsContext context)
+        public ProductsController(IProductsService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            var productsContext = _context.Products.Include(p => p.Category).Include(p => p.Maker).Include(p => p.Supplier);
-            return View(await productsContext.ToListAsync());
+            return View(_service.GetProducts());
         }
 
         // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Maker)
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
+            var product = _service.GetProduct(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -49,9 +45,9 @@ namespace WirelessMediaTask.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name");
-            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name");
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name");
+            ViewData["CategoryId"] = new SelectList(_service.GetCategories(), "CategoryId", "Name");
+            ViewData["MakerId"] = new SelectList(_service.GetMakers(), "MakerId", "Name");
+            ViewData["SupplierId"] = new SelectList(_service.GetSuppliers(), "SupplierId", "Name");
             return View();
         }
 
@@ -60,36 +56,35 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
+        public IActionResult Create([Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
+                _service.AddProduct(product);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
-            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["CategoryId"] = new SelectList(_service.GetCategories(), "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_service.GetMakers(), "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_service.GetSuppliers(), "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
         // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
+            var product = _service.GetProduct(id.Value);
             if (product == null)
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
-            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["CategoryId"] = new SelectList(_service.GetCategories(), "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_service.GetMakers(), "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_service.GetSuppliers(), "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
@@ -98,7 +93,7 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
+        public IActionResult Edit(int id, [Bind("ProductId,Name,Description,Price,CategoryId,MakerId,SupplierId")] Product product)
         {
             if (id != product.ProductId)
             {
@@ -107,43 +102,24 @@ namespace WirelessMediaTask.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.ProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _service.AddProduct(product);
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "CategoryId", "Name", product.CategoryId);
-            ViewData["MakerId"] = new SelectList(_context.Makers, "MakerId", "Name", product.MakerId);
-            ViewData["SupplierId"] = new SelectList(_context.Suppliers, "SupplierId", "Name", product.SupplierId);
+            ViewData["CategoryId"] = new SelectList(_service.GetCategories(), "CategoryId", "Name", product.CategoryId);
+            ViewData["MakerId"] = new SelectList(_service.GetMakers(), "MakerId", "Name", product.MakerId);
+            ViewData["SupplierId"] = new SelectList(_service.GetSuppliers(), "SupplierId", "Name", product.SupplierId);
             return View(product);
         }
 
         // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Maker)
-                .Include(p => p.Supplier)
-                .FirstOrDefaultAsync(m => m.ProductId == id);
+            var product = _service.GetProduct(id.Value);
             if (product == null)
             {
                 return NotFound();
@@ -157,15 +133,9 @@ namespace WirelessMediaTask.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            _context.Products.Remove(product);
-            await _context.SaveChangesAsync();
+            _service.RemoveProduct(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
-        {
-            return _context.Products.Any(e => e.ProductId == id);
-        }
     }
 }

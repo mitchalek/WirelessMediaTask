@@ -1,39 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using WirelessMediaTask.Models;
+using WirelessMediaTask.Services;
 
 namespace WirelessMediaTask.Controllers
 {
     public class SuppliersController : Controller
     {
-        private readonly ProductsContext _context;
+        private readonly IProductsService _service;
 
-        public SuppliersController(ProductsContext context)
+        public SuppliersController(IProductsService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: Suppliers
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Suppliers.ToListAsync());
+            return View(_service.GetSuppliers());
         }
 
         // GET: Suppliers/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.SupplierId == id);
+            var supplier = _service.GetSupplier(id.Value);
             if (supplier == null)
             {
                 return NotFound();
@@ -53,26 +47,25 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SupplierId,Name")] Supplier supplier)
+        public IActionResult Create([Bind("SupplierId,Name")] Supplier supplier)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(supplier);
-                await _context.SaveChangesAsync();
+                _service.AddSupplier(supplier);
                 return RedirectToAction(nameof(Index));
             }
             return View(supplier);
         }
 
         // GET: Suppliers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers.FindAsync(id);
+            var supplier = _service.GetSupplier(id.Value);
             if (supplier == null)
             {
                 return NotFound();
@@ -85,7 +78,7 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SupplierId,Name")] Supplier supplier)
+        public IActionResult Edit(int id, [Bind("SupplierId,Name")] Supplier supplier)
         {
             if (id != supplier.SupplierId)
             {
@@ -94,37 +87,21 @@ namespace WirelessMediaTask.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(supplier);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!SupplierExists(supplier.SupplierId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _service.AddSupplier(supplier);
                 return RedirectToAction(nameof(Index));
             }
             return View(supplier);
         }
 
         // GET: Suppliers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var supplier = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.SupplierId == id);
+            var supplier = _service.GetSupplier(id.Value);
             if (supplier == null)
             {
                 return NotFound();
@@ -136,17 +113,11 @@ namespace WirelessMediaTask.Controllers
         // POST: Suppliers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var supplier = await _context.Suppliers.FindAsync(id);
-            _context.Suppliers.Remove(supplier);
-            await _context.SaveChangesAsync();
+            _service.RemoveSupplier(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SupplierExists(int id)
-        {
-            return _context.Suppliers.Any(e => e.SupplierId == id);
-        }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WirelessMediaTask.Models;
+using WirelessMediaTask.Services;
 
 namespace WirelessMediaTask
 {
@@ -25,6 +26,7 @@ namespace WirelessMediaTask
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ProductsContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WirelessMediaTaskConnection")), ServiceLifetime.Scoped);
+            services.AddScoped<IProductsService, DatabaseProductsService>();
             services.AddControllersWithViews();
         }
 

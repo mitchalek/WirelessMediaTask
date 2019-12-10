@@ -6,34 +6,34 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WirelessMediaTask.Models;
+using WirelessMediaTask.Services;
 
 namespace WirelessMediaTask.Controllers
 {
     public class MakersController : Controller
     {
-        private readonly ProductsContext _context;
+        private readonly IProductsService _service;
 
-        public MakersController(ProductsContext context)
+        public MakersController(IProductsService service)
         {
-            _context = context;
+            _service = service;
         }
 
         // GET: Makers
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
-            return View(await _context.Makers.ToListAsync());
+            return View(_service.GetMakers());
         }
 
         // GET: Makers/Details/5
-        public async Task<IActionResult> Details(int? id)
+        public IActionResult Details(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var maker = await _context.Makers
-                .FirstOrDefaultAsync(m => m.MakerId == id);
+            var maker = _service.GetMaker(id.Value);
             if (maker == null)
             {
                 return NotFound();
@@ -53,26 +53,25 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("MakerId,Name")] Maker maker)
+        public IActionResult Create([Bind("MakerId,Name")] Maker maker)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(maker);
-                await _context.SaveChangesAsync();
+                _service.AddMaker(maker);
                 return RedirectToAction(nameof(Index));
             }
             return View(maker);
         }
 
         // GET: Makers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        public IActionResult Edit(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var maker = await _context.Makers.FindAsync(id);
+            var maker = _service.GetMaker(id.Value);
             if (maker == null)
             {
                 return NotFound();
@@ -85,7 +84,7 @@ namespace WirelessMediaTask.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("MakerId,Name")] Maker maker)
+        public IActionResult Edit(int id, [Bind("MakerId,Name")] Maker maker)
         {
             if (id != maker.MakerId)
             {
@@ -94,37 +93,21 @@ namespace WirelessMediaTask.Controllers
 
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(maker);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!MakerExists(maker.MakerId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                _service.AddMaker(maker);
                 return RedirectToAction(nameof(Index));
             }
             return View(maker);
         }
 
         // GET: Makers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return NotFound();
             }
 
-            var maker = await _context.Makers
-                .FirstOrDefaultAsync(m => m.MakerId == id);
+            var maker = _service.GetMaker(id.Value);
             if (maker == null)
             {
                 return NotFound();
@@ -136,17 +119,11 @@ namespace WirelessMediaTask.Controllers
         // POST: Makers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public IActionResult DeleteConfirmed(int id)
         {
-            var maker = await _context.Makers.FindAsync(id);
-            _context.Makers.Remove(maker);
-            await _context.SaveChangesAsync();
+            _service.RemoveMaker(id);
             return RedirectToAction(nameof(Index));
         }
 
-        private bool MakerExists(int id)
-        {
-            return _context.Makers.Any(e => e.MakerId == id);
-        }
     }
 }
