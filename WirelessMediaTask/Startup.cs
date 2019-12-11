@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using WirelessMediaTask.Models;
 using WirelessMediaTask.Services;
-
+using System.Text.Json;
 namespace WirelessMediaTask
 {
     public class Startup
@@ -25,8 +25,14 @@ namespace WirelessMediaTask
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ProductsContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WirelessMediaTaskConnection")), ServiceLifetime.Scoped);
-            services.AddScoped<IProductsService, DatabaseProductsService>();
+            // === DATABASE IMPLEMENTATION:
+            //services.AddDbContext<ProductsContext>(options => options.UseSqlServer(Configuration.GetConnectionString("WirelessMediaTaskConnection")), ServiceLifetime.Scoped);
+            //services.AddScoped<IProductsService, DatabaseProductsService>();
+
+            // === JSON FILE IMPLEMENTATION:
+            services.AddScoped<ProductsJSONFileContext>();
+            services.AddScoped<IProductsService, JSONFileProductsService>();
+
             services.AddControllersWithViews();
         }
 

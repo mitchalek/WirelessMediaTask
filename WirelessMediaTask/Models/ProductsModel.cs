@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace WirelessMediaTask.Models
 {
@@ -15,14 +16,17 @@ namespace WirelessMediaTask.Models
         [Display(Name = "Category")]
         [Required]
         public int CategoryId { get; set; }
+        [JsonIgnore]
         public Category Category { get; set; }
         [Display(Name = "Maker")]
         [Required]
         public int MakerId { get; set; }
+        [JsonIgnore]
         public Maker Maker { get; set; }
         [Display(Name = "Supplier")]
         [Required]
         public int SupplierId { get; set; }
+        [JsonIgnore]
         public Supplier Supplier { get; set; }
     }
     public class Category
@@ -30,6 +34,7 @@ namespace WirelessMediaTask.Models
         public int CategoryId { get; set; }
         [Required]
         public string Name { get; set; }
+        [JsonIgnore]
         public ICollection<Product> Products { get; set; }
     }
     public class Maker
@@ -37,6 +42,7 @@ namespace WirelessMediaTask.Models
         public int MakerId { get; set; }
         [Required]
         public string Name { get; set; }
+        [JsonIgnore]
         public ICollection<Product> Products { get; set; }
     }
     public class Supplier
@@ -44,10 +50,18 @@ namespace WirelessMediaTask.Models
         public int SupplierId { get; set; }
         [Required]
         public string Name { get; set; }
+        [JsonIgnore]
         public ICollection<Product> Products { get; set; }
     }
 
 
+    public class ProductsModel
+    {
+        public IList<Category> Categories { get; set; } = new List<Category>();
+        public IList<Maker> Makers { get; set; } = new List<Maker>();
+        public IList<Supplier> Suppliers { get; set; } = new List<Supplier>();
+        public IList<Product> Products { get; set; } = new List<Product>();
+    }
     public class ProductsContext : DbContext
     {
         public ProductsContext() : base() { }
